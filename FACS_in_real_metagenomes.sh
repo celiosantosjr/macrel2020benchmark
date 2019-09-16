@@ -90,4 +90,18 @@ cat header tmp3 | pigz --best > qinetal2010_metagenomes.clstrs.tsv.gz
 rm -rf tmp2 tmp3 header
 
 ##################################################################################################################################################################
+# Comparison with prokaryotic genomes' AMPs
+zcat AMPs.tsv.gz | sed '1,1d' | awk '{print ">"$1"\n"$2}' > tmp.fa
+zcat qinetal2010_metagenomes.clstrs.tsv.gz | sed '1,1d' | awk '{print ">"$1"\n"$2}' > qin.fa
+
+makeblastdb -in tmp.fa -dbtype prot -out PAC.db
+rm -rf tmp.fa
+
+blastp -db PAC.db -query qin.fa -out AMPs.QAC.tsv\
+-evalue 1e-5 -word_size 3 -qcov_hsp_perc 95.0\
+-outfmt "6 qseqid qlen sseqid slen pident length mismatch gapopen qstart qend sstart send evalue bitscore qcovs"
+
+awk '$4 >= 70 && $13 <= 0.00001 && $15 >= 95' AMPs.QAC.tsv | sort -k1,1 -k14,14gr -k13,13g -k4,4gr | sort -u -k1,1 --merge > AMPs.QAC.parsed.tsv
+
+##################################################################################################################################################################
 ##################################################################################################################################################################
