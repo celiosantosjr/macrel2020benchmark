@@ -8,13 +8,14 @@ This is a companion repository to:
 > by Célio Dias Santos Júnior and Luis Pedro Coelho _in_ Bionformatics XX:YY (2019)
 > [http://doi.org/XXX](http://doi.org/XXX)
 
+
+## Order of scripts
+
 It contains the rules to rebuild the benchmark proposed in the paper.
 
 However, instead just running the code, we strongly recommend to read it.
 
 Some steps depended on inputs obtained from manual curation, impossible to reproduce easily here.
-
-## Order of scripts
 
 The order to reproduce the entire paper benchmark is:
 
@@ -31,7 +32,7 @@ The order to reproduce the entire paper benchmark is:
 
 ## Third party softwares
 
-In order to run all the codes, you will need:
+In order to run all the codes, you will need besides FACS:
 
 - Spurio (https://bitbucket.org/bateman-group/spurio/src/master/)
 - ArtMountRainier (https://www.niehs.nih.gov/research/resources/software/biostatistics/art/index.cfm)
