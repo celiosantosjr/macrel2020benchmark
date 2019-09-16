@@ -190,9 +190,17 @@ rm -rf tmp2 tmp3 header
 
 cd $BENCHMARK_DIR/analysis/comparison/
 
+zcat $BENCHMARK_DIR/analysis/metagenomes/AMP.nonspu.tsv | awk '{print ">"$1"\n"$2}' | sed '1,2d' > tmp2.fa
+
+blastp -db PAC.db -query tmp2.fa -out SIM_clstrs_vsPAC.tsv\
+	-evalue 1e-5 -word_size 3 -qcov_hsp_perc 95.0\
+	-outfmt "6 qseqid qlen sseqid slen pident length mismatch gapopen qstart qend sstart send evalue bitscore qcovs"
+
+rm -rf tmp2.fa
+
 zcat $BENCHMARK_DIR/analysis/genomes/repcontigs.nonspu.AMP.clstrs.tsv.gz | awk '{print ">"$1"\n"$2}' | sed '1,2d' > tmp.fa
 
-blastp -db PAC.db -query tmp.fa -out SIM_clstrs_vsPAC.tsv\
+blastp -db PAC.db -query tmp.fa -out RepContigs_clstrs_vsPAC.tsv\
 	-evalue 1e-5 -word_size 3 -qcov_hsp_perc 95.0\
 	-outfmt "6 qseqid qlen sseqid slen pident length mismatch gapopen qstart qend sstart send evalue bitscore qcovs"
 
