@@ -8,6 +8,20 @@ This is a companion repository to:
 > by Célio Dias Santos Júnior and Luis Pedro Coelho _in_ Bionformatics XX:YY (2019)
 > [http://doi.org/XXX](http://doi.org/XXX)
 
-It contains most of rules to rebuild the benchmark proposed in the paper.
+It contains the rules to rebuild the benchmark proposed in the paper.
 
-However, it is needed to read some steps, since they were curated manually.
+However, instead just running the code, we strongly recommend to read it.
+
+Some steps depended on inputs obtained from manual curation, impossible to reproduce easily here.
+
+The order to reproduce the entire paper benchmark is:
+
+(1) FACS_in_prokaryotic_genomes.sh
+
+(2) FACS_in_real_metagenomes.sh
+
+(3) FACS_in_simulated_data.sh
+
+(4) FACS_new_metagenomes_simulation.sh
+
+(5) Annotation_rules.sh
