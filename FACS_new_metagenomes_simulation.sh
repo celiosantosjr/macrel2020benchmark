@@ -117,6 +117,8 @@ mv AMP.tsv  $BENCHMARK_DIR/analysis/metagenomes/newsim/AMP.nonspu.tsv
 ##################################################################################################################################################################
 # Comparison with prokaryotic genomes' AMP 
 
+cd $BENCHMARK_DIR/analysis/comparison
+
 zcat $BENCHMARK_DIR/analysis/metagenomes/newsim/AMP.nonspu.tsv | awk '{print ">"$1"\n"$2}' | sed '1,2d' > tmp2.fa
 
 blastp -db PAC.db -query tmp2.fa -out NEWSIM_clstrs_vsPAC.tsv\
