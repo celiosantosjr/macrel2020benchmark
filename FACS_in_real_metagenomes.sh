@@ -3,139 +3,91 @@
 ######################### Analysis of proteins from Complete genome assemblies and representative genomes from proGenomes database.
 ##################################################################################################################################################################
 ##################################################################################################################################################################
-# To download genomes
+# To download metagenomes
 
-mkdir refseq
-mkdir refseq/archaea
-mkdir refseq/bacteria
-mkdir refseq/viral
-mkdir refseq/progenomes
+mkdir metagenomes/
+mkdir metagenomes/data
+mkdir metagenoma/FACS
+mkdir metagenoma/FACS/BASHLOG/
+mkdir metagenoma/FACS/IDS/
+mkdir metagenoma/FACS/AMP
+mkdir metagenoma/FACS/LOG
+cd metagenomes/data/
 
-wget --header 'Host: progenomes.embl.de' --user-agent 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:69.0) Gecko/20100101 Firefox/69.0' --header 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' --header 'Accept-Language: en-US,en;q=0.5' --referer 'http://progenomes.embl.de/representatives.cgi' --header 'Cookie: _ga=GA1.2.6012777.1568177574; _pk_id.19.a302=e6b2e563065c012c.1568179528.4.1568630807.1568630773.; _pk_ref.19.a302=%5B%22%22%2C%22%22%2C1568630773%2C%22https%3A%2F%2Fwww.google.com%2F%22%5D; _pk_ses.19.a302=1' --header 'Upgrade-Insecure-Requests: 1' 'http://progenomes.embl.de/data/repGenomes/representatives.contigs.fasta.gz' --output-document 'representatives.contigs.fasta.gz'
+for i in $(cat qinetal2010.list); 
+do 
+	wget http://www.bork.embl.de/~arumugam/Qin_et_al_2010/$i
+done
+
+cd ../
 
 ##################################################################################################################################################################
-## To download genome assemblies we used the ncbi-genome-download device (https://github.com/kblin/ncbi-genome-download)
 
-ncbi-genome-download -F fasta --assembly-level complete bacteria -o refseq/bacteria --parallel 3
-ncbi-genome-download -F fasta --assembly-level complete archaea -o refseq/archaea --parallel 3
-ncbi-genome-download -F fasta --assembly-level complete viral -o refseq/viral --parallel 3
-
-##################################################################################################################################################################
-# Once all genomes downloaded
-# Create a list with 3 columns: file, species, kingdom(archaea, bacteria, viral)
-
-mv representatives.contigs.fasta.gz refseq/progenomes/
-zgrep ">" refseq/progenomes/representatives.contigs.fasta.gz > col
-sed 's/\..*//g' col > col2
-for i in $(cat col2); do echo "bacteria" >> col3; done
-paste -d'\t' col col2 col3 > progenomes.tab; rm -rf col col2 col3
-
-ncbi-genome-download -F fasta --assembly-level complete viral --parallel 3 --dry-run | sed 's/ /_/g' > genomes_viral_list.txt
-ncbi-genome-download -F fasta --assembly-level complete archaea --parallel 3 --dry-run | sed 's/ /_/g' > genomes_bacteria_list.txt
-ncbi-genome-download -F fasta --assembly-level complete bacteria --parallel 3 --dry-run | sed 's/ /_/g' > genomes_archaea_list.txt
-
-cp genomes_archaea_list.txt tmp; cut -f1 genomes_archaea_list.txt | sed '1,1d' | sort > t; mv t genomes_archaea_list.txt; for i in $(ls refseq/archaea/); do echo "$i" > tp; inc=`awk -F"_" '{print $1"_"$2}' tp`; name=`grep "$inc" genomes_archaea_list.txt | sed 's/ /_/g' | awk '{$1=""}1' | sed 's/\t//g'`; echo -e "$i\t$name\tarchaea" >> final_list; mv tmp genomes_archaea_list.txt
-
-cp genomes_bacteria_list.txt tmp; cut -f1 genomes_bacteria_list.txt | sed '1,1d' | sort > t; mv t genomes_bacteria_list.txt; for i in $(ls refseq/bacteria/); do echo "$i" > tp; inc=`awk -F"_" '{print $1"_"$2}' tp`; name=`grep "$inc" genomes_bacteria_list.txt | sed 's/ /_/g' | awk '{$1=""}1' | sed 's/\t//g'`; echo -e "$i\t$name\tbacteria" >> final_list; mv tmp genomes_bacteria_list.txt
-
-cp genomes_viral_list.txt tmp; cut -f1 genomes_viral_list.txt | sed '1,1d' | sort > t; mv t genomes_viral_list.txt; for i in $(ls refseq/viral/); do echo "$i" > tp; inc=`awk -F"_" '{print $1"_"$2}' tp`; name=`grep "$inc" genomes_viral_list.txt | sed 's/ /_/g' | awk '{$1=""}1' | sed 's/\t//g'`; echo -e "$i\t$name\tviral" >> final_list; mv tmp genomes_viral_list.txt
-
-# Then run:
-
-mkdir FACS
-mkdir FACS/bacteria
-mkdir FACS/archaea
-mkdir FACS/viral
-mkdir FACS/repcontigs
-
-while read a b c
+while read a
 do
 
-	echo -e "Doing $a genome from $b -- SK: $c"
-	./FACS.sh -m c --fasta refseq/$a --outfolder FACS/$c --outtag ${a/.fasta.gz/} -t 3 --block 100M --log $b.log > FACS/$c/bashlog.$b.txt
-
-done < final.list
-
-./FACS.sh -m c --fasta refseq/progenomes/representatives.contigs.fasta.gz --outfolder FACS/progenomes/ --outtag proGenomes -t 3 --block 100M --log proGenomes.log > FACS/$c/bashlog.proGenomes.txt
-
-
-##################################################################################################################################################################
-# All results are then organized into:
-
-mkdir AMP
-mkdir BASHLOG
-mkdir IDS
-mkdir LOGs
-
-cd FACS/archaea; mv *.logs LOGSs/; mv bashlog.* BASHLOG/; mv *ids.tsv.gz IDS/; mv *.tsv.gz AMP/; cd ../
-cd FACS/bacteria; mv *.logs LOGSs/; mv bashlog.* BASHLOG/; mv *ids.tsv.gz IDS/; mv *.tsv.gz AMP/; cd ../
-cd FACS/viral; mv *.logs LOGSs/; mv bashlog.* BASHLOG/; mv *ids.tsv.gz IDS/; mv *.tsv.gz AMP/; cd ../
+	echo -e "Doing $a metagenome"
+	./FACS.sh -m c --fasta data/$a --outfolder FACS/ --outtag ${a/.seq.fa.gz/}\
+	-t 3 --block 100M --log ${a/.seq.fa.gz/}.log > FACS/BASHLOG/bashlog.${a/.seq.fa.gz/}.txt
+	
+	mv *.log FACS/LOG/
+	mv *.ids.tsv.gz FACS/IDS/
+	mv *.tsv.gz FACS/AMP/
+	
+done < qinetal2010.list
 
 ##################################################################################################################################################################
 # Then all AMPs were pooled:
 
-mkdir all
+cd AMP/
+touch wow
 
-cp FACS/bacteria/AMP/* all/
-cp FACS/archaea/AMP/* all/
-cp FACS/viral/AMP/* all/
-cp FACS/progenomes/proGenomes.tsv.gz all/
-
-cd all/
-
-for i in $(ls );
+for i in $(ls *gz);
 do
-	zcat $i | sed '1,1d' > tmp
-	f=${i/.tsv.gz/}
-	sed "s/smORF_/$f|smORF/g" tmp >> AMPs.tsv
-	rm -rf tm
+	zcat $i | sed '/Access/d' > tmp
+	sed -i "s/^/${i/.tsv.gz/}|/g" tmp
+	cat tmp wow > tw; rm -rf tmp
+	mv tw wow
 done
 
-while read a b c d e f;
-do
-	echo "$a" | sed 's/|.*//g' > tmp
-	fi=`cat tmp`
-	rm -rf tmp
-	val=`grep "$fi" ../final.list | cut -f3`
-	echo -e "$a\t$b\t$c\t$d\t$e\t$f\tbacteria\t$val" >> tpe
-done < AMPs.tsv; mv tpe AMPs.tsv
+echo -e "Access\tSequence\tAMP_family\tAMP_probability\tHemolytic\tHemolytic_probability" > header
 
-echo -e "Access\tSequence\tAMP_family\tAMP_probability\tHemolytic\tHemolytic_probability\tKingdom\tSpecies" > header
+cat header wow | pigz --best > qin2010_humangut.AMP.tsv.gz
 
-cat header AMPs.tsv > tmp; mv tmp AMPs.tsv
-
-##################################################################################################################################################################
-## AMPs from proGenomes were parsed manually using the numbers coding to species that were searched in the proGenomes database.
-## These AMPs were then replicated in AMPs.TSV file accordingly to their original contigs present in the ids.tsv.gz files.
-## All AMPs were analyzed manually to curate each cluster accordingly to the same sequence, a preliminary list of unique sequences
-## obtained as clusters representatives was obtained as follows:
-
-zcat AMPs.tsv.gz | cut -f2 | sed '1,1d' | sort | uniq -c | awk '{print $2"\t"$1}' > t
-echo -e "Sequence\tCluster_size" > he; cat he t > preliminary_clusters; rm -rf he t
-
-## Once all AMPs from assemblies and proGenomes database were in AMPs file, then:
-
-pigz --best AMPs.tsv
+rm -rf header wow
 
 ##################################################################################################################################################################
 # Spurious analysis - To this it was used the tool from Hops et al. (2018), more info in: <https://bitbucket.org/bateman-group/spurio/src/master/>
 
-zcat AMP.tsv.gz | awk '{print ">"$1"\n"$2}' | sed '1,2d' > tmp.fa
+zcat qin2010_humangut.AMP.tsv.gz | awk '{print ">"$1"\n"$2}' | sed '1,2d' > tmp.fa
 python3 spurio.py -s 1 -e $(grep -c ">" tmp.fa) -v 1 -r /path/to/spurio/db/fullsource_filter.fa -q tmp.fa -qt spurio_res
 rm -rf tmp.fa
 awk '$2 > 0.8' spurious_res.txt | awk '{print $1}' > list
-pigz -dc AMP.tsv.gz > tmp
-grep -v -w -f list tmp > AMP.tsv
-cut -f4 AMP.tsv | sed '1,1d' > nonspurious.scores
-grep -w -f list tmp | cut -f4 > spurious.scores
-echo "spurious" > t; cat t spurious.scores > tt; rm -rf t; mv tt spurious.scores
-rm -rf AMP.tsv.gz tmp list
-paste -d'\t' nonspurious.scores spurious.scores > scores_comparison; rm -rf *.scores
+zgrep -v -w -f list qin2010_humangut.AMP.tsv.gz > AMP.tsv
+mv AMP.tsv qin2010_humangut.AMP.tsv
+pigz --best qin2010_humangut.AMP.tsv
 
-# To generate figure 2 it was used a R script with scores_comparison table:
-R --vanilla --slave boxplot_chart_maker.R
+##################################################################################################################################################################
+## Clustering AMPs
+
+zcat qin2010_humangut.AMP.tsv.gz | cut -f2 | sed '1,1d' | sort -k1,1 | uniq -c | awk '{print $2"\t"$1}' > col1
+zcat qin2010_humangut.AMP.tsv.gz | cut -f1,2 | sed '1,1d' | awk '{print $2"\t"$1}' | sort -k1,1 |  awk -F'\t' -v OFS=';' '{x=$1;$1="";a[x]=a[x]$0}END{for(x in a)print x,a[x]}' | sed 's/;;/\t/g' > col2
+sort -k1,1 col2 > tmp; mv tmp col2
+
+for i in $(zcat qin2010_humangut.AMP.tsv.gz | sed '1,1d' | cut -f2 | sort | uniq);
+do
+	zgrep "$i" qin2010_humangut.AMP.tsv.gz | cut -f2,3,4,5,6 | uniq >> col3
+done
+
+sort -k1,1 col3 > tmp; mv tmp col3
+join col1 col2 | sed 's/ /\t/g' > tmp
+join tmp col3 | sed 's/ /\t/g' > tmp2
+rm -rf tmp col*
+
+echo -e "Access\tPeptide\tCluster size\tCluster representatives\tAMP family\tAMP probability\tHemolytic peptide\tHemolytic probability" > header
+awk '{print "QAC"NR"\t"$0}' tmp2 > tmp3
+cat header tmp3 | pigz --best > qinetal2010_metagenomes.clstrs.tsv.gz
+rm -rf tmp2 tmp3 header
 
 ##################################################################################################################################################################
 ##################################################################################################################################################################
-
-
