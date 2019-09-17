@@ -9,7 +9,7 @@ This is a companion repository to:
 > [http://doi.org/XXX](http://doi.org/XXX)
 
 
-## Order of scripts
+## Contents
 
 It contains the rules to rebuild the benchmark proposed in the paper.
 
@@ -17,7 +17,9 @@ However, instead just running the code, we strongly recommend to read it.
 
 Some steps depended on inputs obtained from manual curation, impossible to reproduce easily here.
 
-The order to reproduce the entire paper benchmark is:
+- To evaluate benchmarking results over tested AMP prediction models, please refer to the file "benchmark_AMP_models.xlsx".
+
+The order to reproduce FACS benchmarking is:
 
 (1) FACS_in_prokaryotic_genomes.sh
 
