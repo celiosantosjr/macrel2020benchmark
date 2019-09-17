@@ -11,7 +11,7 @@ mkdir refseq/bacteria
 mkdir refseq/viral
 mkdir refseq/progenomes
 
-wget --header 'Host: progenomes.embl.de' --user-agent 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:69.0) Gecko/20100101 Firefox/69.0' --header 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' --header 'Accept-Language: en-US,en;q=0.5' --referer 'http://progenomes.embl.de/representatives.cgi' --header 'Cookie: _ga=GA1.2.6012777.1568177574; _pk_id.19.a302=e6b2e563065c012c.1568179528.4.1568630807.1568630773.; _pk_ref.19.a302=%5B%22%22%2C%22%22%2C1568630773%2C%22https%3A%2F%2Fwww.google.com%2F%22%5D; _pk_ses.19.a302=1' --header 'Upgrade-Insecure-Requests: 1' 'http://progenomes.embl.de/data/repGenomes/representatives.contigs.fasta.gz' --output-document 'representatives.contigs.fasta.gz'
+wget --header 'Host: progenomes.embl.de' --referer 'http://progenomes.embl.de/representatives.cgi' 'http://progenomes.embl.de/data/repGenomes/representatives.contigs.fasta.gz' --output-document 'representatives.contigs.fasta.gz'
 
 ##################################################################################################################################################################
 ## To download genome assemblies we used the ncbi-genome-download device (https://github.com/kblin/ncbi-genome-download)
