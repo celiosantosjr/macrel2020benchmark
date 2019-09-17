@@ -12,11 +12,11 @@
 
 mkdir DRAMP
 
-wget --header 'Host: s3-eu-west-1.amazonaws.com' --user-agent 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:69.0) Gecko/20100101 Firefox/69.0' --header 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' --header 'Accept-Language: en-US,en;q=0.5' --header 'Upgrade-Insecure-Requests: 1' 'https://s3-eu-west-1.amazonaws.com/pstorage-npg-968563215/15926912/DRAMP_general_amps.xlsx' --output-document 'DRAMP_general_amps.xlsx'
+wget 'https://s3-eu-west-1.amazonaws.com/pstorage-npg-968563215/15926912/DRAMP_general_amps.xlsx' --output-document 'DRAMP_general_amps.xlsx'
 
-wget --header 'Host: s3-eu-west-1.amazonaws.com' --user-agent 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:69.0) Gecko/20100101 Firefox/69.0' --header 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' --header 'Accept-Language: en-US,en;q=0.5' --header 'Upgrade-Insecure-Requests: 1' 'https://s3-eu-west-1.amazonaws.com/pstorage-npg-968563215/15926900/DRAMP_patent_amps.xlsx' --output-document 'DRAMP_patent_amps.xlsx'
+wget 'https://s3-eu-west-1.amazonaws.com/pstorage-npg-968563215/15926900/DRAMP_patent_amps.xlsx' --output-document 'DRAMP_patent_amps.xlsx'
 
-wget --header 'Host: s3-eu-west-1.amazonaws.com' --user-agent 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:69.0) Gecko/20100101 Firefox/69.0' --header 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' --header 'Accept-Language: en-US,en;q=0.5' --header 'Upgrade-Insecure-Requests: 1' 'https://s3-eu-west-1.amazonaws.com/pstorage-npg-968563215/15926906/DRAMP_clinical_amps.xlsx' --output-document 'DRAMP_clinical_amps.xlsx'
+wget 'https://s3-eu-west-1.amazonaws.com/pstorage-npg-968563215/15926906/DRAMP_clinical_amps.xlsx' --output-document 'DRAMP_clinical_amps.xlsx'
 
 ## Manually, the database was cleanned from non-sequences or sequences containing non usual amino acids.
 ## This new file was saved in DRAMP.tsv
