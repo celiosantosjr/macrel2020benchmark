@@ -19,7 +19,13 @@ Some steps depended on inputs obtained from manual curation, impossible to repro
 
 - To evaluate benchmarking results over tested AMP prediction models, please refer to the file "benchmark_AMP_models.xlsx".
 
-The order to reproduce FACS benchmarking is:
+- To reproduce benchmarking results over hemolytic peptides prediction model implemented in FACS, please follow the code bellow:
+
+```
+$ R --vanilla --slave hemolytic_peptides_model_benchmark.R
+```
+
+The other results showed in the FACS benchmarking can be reproduced using the scripts in the following order:
 
 (1) FACS_in_prokaryotic_genomes.sh
 
@@ -32,7 +38,7 @@ The order to reproduce FACS benchmarking is:
 (5) Annotation_rules.sh
 
 
-## Third party softwares
+### Third party softwares
 
 In order to run all the codes, you will need besides FACS:
 
