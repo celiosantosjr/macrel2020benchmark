@@ -5,9 +5,8 @@ This repository includes code for benchmarking *FACS*.
 This is a companion repository to:
 
 > _FACS: Fast antimicrobial peptides screening in high throughput data_
-> by Célio Dias Santos Júnior and Luis Pedro Coelho _in_ preparation
-#Bionformatics XX:YY (2019)
-#> [http://doi.org/XXX](http://doi.org/XXX)
+> by Célio Dias Santos Júnior and Luis Pedro Coelho _in_ Bionformatics XX:YY (2019)
+> [http://doi.org/XXX](http://doi.org/XXX)
 
 
 ## Contents
