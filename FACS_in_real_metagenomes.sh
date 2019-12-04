@@ -1,107 +1,122 @@
-##################################################################################################################################################################
-##################################################################################################################################################################
-######################### Analysis of proteins from Complete genome assemblies and representative genomes from proGenomes database.
-##################################################################################################################################################################
-##################################################################################################################################################################
-# To download metagenomes
+#!/usr/bin/env bash
 
-mkdir metagenomes/
-mkdir metagenomes/data
-mkdir metagenoma/FACS
-mkdir metagenoma/FACS/BASHLOG/
-mkdir metagenoma/FACS/IDS/
-mkdir metagenoma/FACS/AMP
-mkdir metagenoma/FACS/LOG
-cd metagenomes/data/
+set -e
 
-for i in $(cat qinetal2010.list); 
+BENCHMARK_DIR=$PWD/BENCHMARK
+FACS="/path/to/FACS20.sh"
+addTEMP="/tmp/facstempdir"
+spurio="/path/to/spurio.py"
+db="/path/to/spurio/db/fullsource_filter.fa"
+express="/path/to/eXpress"
+
+##################################################################################################################################################################
+# Creating directories
+
+mkdir -p $BENCHMARK_DIR/metagenomes/{data FACS}
+mkdir -p $BENCHMARK_DIR/metagenomes/data/{metaT bam profiles}
+mkdir -p $BENCHMARK_DIR/metagenomes/FACS/{BASHLOG IDS AMP LOG CONTIGS}
+out="$BENCHMARK_DIR/metagenomes/FACS/"
+
+##################################################################################################################################################################
+# To download metagenomes and metatranscriptomes
+
+for i in $(cat SRR_Acc_List.txt); 
 do 
-	wget http://www.bork.embl.de/~arumugam/Qin_et_al_2010/$i
+	fastq-dump -I --split-files --outdir $BENCHMARK_DIR/metagenomes/data/ --gzip $i
 done
 
-cd ../
+for i in $(cat SRR_Acc_List2.txt); 
+do 
+	fastq-dump -I --split-files --outdir $BENCHMARK_DIR/metagenomes/data/metaT/ --gzip $i
+done
 
 ##################################################################################################################################################################
-
+# Processing files with FACS
 while read a
 do
 
 	echo -e "Doing $a metagenome"
-	./FACS.sh -m c --fasta data/$a --outfolder FACS/ --outtag ${a/.seq.fa.gz/}\
-	-t 3 --block 100M --log ${a/.seq.fa.gz/}.log > FACS/BASHLOG/bashlog.${a/.seq.fa.gz/}.txt
+	$FACS -m r --fwd $BENCHMARK_DIR/metagenomes/data/"$a"_1.fastq.gz --rev $BENCHMARK_DIR/metagenomes/data/"$a"_2.fastq.gz 
+	\--outfolder $out --outtag $a
+	\-t 3 --block 100M --log $a.log
+	\--tmp $addTEMP > $out/bashlog.$a.txt
 	
-	mv *.log FACS/LOG/
-	mv *.ids.tsv.gz FACS/IDS/
-	mv *.tsv.gz FACS/AMP/
+	mv $a.log $out/LOG/
+	mv $a.ids.tsv.gz $out/IDS/
+	mv $a.tsv.gz $out/AMP/
+	mv $a.fna.gz $out/CONTIGS/
 	
-done < qinetal2010.list
+done < SRR_Acc_List.txt
 
 ##################################################################################################################################################################
 # Then all AMPs were pooled:
 
-cd AMP/
+cd $out/AMP/
 touch wow
-
-for i in $(ls *gz);
-do
-	zcat $i | sed '/Access/d' > tmp
-	sed -i "s/^/${i/.tsv.gz/}|/g" tmp
-	cat tmp wow > tw; rm -rf tmp
-	mv tw wow
-done
+zcat * | sed '/Access/d' | cut -f2- | sort -k1,1 | uniq > tmp
 
 echo -e "Access\tSequence\tAMP_family\tAMP_probability\tHemolytic\tHemolytic_probability" > header
 
-cat header wow | pigz --best > qin2010_humangut.AMP.tsv.gz
+cat header tmp | pigz --best > heinz2016.AMP.tsv.gz
 
-rm -rf header wow
+rm -rf header tmp
 
 ##################################################################################################################################################################
 # Spurious analysis - To this it was used the tool from Hops et al. (2018), more info in: <https://bitbucket.org/bateman-group/spurio/src/master/>
 
-zcat qin2010_humangut.AMP.tsv.gz | awk '{print ">"$1"\n"$2}' | sed '1,2d' > tmp.fa
-python3 spurio.py -s 1 -e $(grep -c ">" tmp.fa) -v 1 -r /path/to/spurio/db/fullsource_filter.fa -q tmp.fa -qt spurio_res
-rm -rf tmp.fa
+zcat heinz2016.AMP.tsv.gz | sed '1,1d' | awk '{print ">"NR"\n"$1}' > tmp.fa
+python3 $spurio -s 1 -e $(grep -c ">" tmp.fa) -v 1 -r $db -q tmp.fa -qt spurio_res
 awk '$2 > 0.8' spurious_res.txt | awk '{print $1}' > list
-zgrep -v -w -f list qin2010_humangut.AMP.tsv.gz > AMP.tsv
-mv AMP.tsv qin2010_humangut.AMP.tsv
-pigz --best qin2010_humangut.AMP.tsv
+zgrep -v -w -A1 -f list tmp.fa | grep -v ">" > AMP
+rm -rf list tmp.fa
+zgrep -w -f AMP heinz2016.AMP.tsv.gz > heinz2016.AMP.tsv
+rm -rf AMP heinz2016.AMP.tsv.gz
+pigz --best heinz2016.AMP.tsv
 
 ##################################################################################################################################################################
-## Clustering AMPs
+##################################################################################################################################################################
+# Extracting genes
 
-zcat qin2010_humangut.AMP.tsv.gz | cut -f2 | sed '1,1d' | sort -k1,1 | uniq -c | awk '{print $2"\t"$1}' > col1
-zcat qin2010_humangut.AMP.tsv.gz | cut -f1,2 | sed '1,1d' | awk '{print $2"\t"$1}' | sort -k1,1 |  awk -F'\t' -v OFS=';' '{x=$1;$1="";a[x]=a[x]$0}END{for(x in a)print x,a[x]}' | sed 's/;;/\t/g' > col2
-sort -k1,1 col2 > tmp; mv tmp col2
+zcat heinz2016.AMP.tsv.gz | cut -f1 > seqs
 
-for i in $(zcat qin2010_humangut.AMP.tsv.gz | sed '1,1d' | cut -f2 | sort | uniq);
+for i in $(ls $BENCHMARK_DIR/metagenomes/FACS/IDS/)
 do
-	zgrep "$i" qin2010_humangut.AMP.tsv.gz | cut -f2,3,4,5,6 | uniq >> col3
+	new=${i/.tsv.gz/}
+	zgrep -w -f seqs $BENCHMARK_DIR/metagenomes/FACS/IDS/$i > tmp
+	cut -f3 tmp | sed 's/_#_/_/g' | awk -F"_" '{print $1"_"$2":"$4"-"$5"}' > tmp2
+	pigz -dc $BENCHMARK_DIR/metagenomes/FACS/CONTIGS/${i/.tsv.gz/.fna.gz} > tmp.fa
+	xargs samtools tmp.fa < tmp2 > tmp3
+	rm -rf tmp2 tmp
+	sed -i "s/>/>$new/g" tmp3
+	mv tmp3 $new.tmp tmp.fa*
 done
+cat *.tmp > AMP.genes.fa
+rm -rf seqs *.tmp
 
-sort -k1,1 col3 > tmp; mv tmp col3
-join col1 col2 | sed 's/ /\t/g' > tmp
-join tmp col3 | sed 's/ /\t/g' > tmp2
-rm -rf tmp col*
+# Abundance
+bwa index AMP.genes.fa
 
-echo -e "Access\tPeptide\tCluster size\tCluster representatives\tAMP family\tAMP probability\tHemolytic peptide\tHemolytic probability" > header
-awk '{print "QAC"NR"\t"$0}' tmp2 > tmp3
-cat header tmp3 | pigz --best > qinetal2010_metagenomes.clstrs.tsv.gz
-rm -rf tmp2 tmp3 header
+while read a
+do
+	bwa mem -p AMP.genes.fa $BENCHMARK_DIR/metagenomes/data/metaT/$a_1.fastq.gz
+	\$BENCHMARK_DIR/metagenomes/data/metaT/$a_2.fastq.gz | samtools view -Sb > $BENCHMARK_DIR/metagenomes/data/bam/$a.bam
+	samtools sort -n -o $BENCHMARK_DIR/metagenomes/data/bam/$a.bam.sorted $BENCHMARK_DIR/metagenomes/data/bam/$a.bam
+	rm -rf $BENCHMARK_DIR/metagenomes/data/bam/$a.bam
+done < SRR_Acc_List2.txt
 
-##################################################################################################################################################################
-# Comparison with prokaryotic genomes' AMPs
-zcat AMPs.tsv.gz | sed '1,1d' | awk '{print ">"$1"\n"$2}' > tmp.fa
-zcat qinetal2010_metagenomes.clstrs.tsv.gz | sed '1,1d' | awk '{print ">"$1"\n"$2}' > qin.fa
+mv AMP.genes.fa $BENCHMARK_DIR/metagenomes/data/FACS/AMP/
 
-makeblastdb -in tmp.fa -dbtype prot -out PAC.db
-rm -rf tmp.fa
+ls $BENCHMARK_DIR/metagenomes/data/bam/ | sed -n -e 'H;${x;s/\n/,/g;s/^,//;p;}' > list
 
-blastp -db PAC.db -query qin.fa -out AMPs.QAC.tsv\
--evalue 1e-5 -word_size 3 -qcov_hsp_perc 95.0\
--outfmt "6 qseqid qlen sseqid slen pident length mismatch gapopen qstart qend sstart send evalue bitscore qcovs"
+## Verify is the list is complete then:
+cd $BENCHMARK_DIR/metagenomes/data/bam/
+$express --no-update-check --no-bias-correct --calc-covar
+	\-o $BENCHMARK_DIR/metagenomes/data/profiles
+	\$BENCHMARK_DIR/metagenomes/data/FACS/AMP/AMP.genes.fa
+	\$(cat list)
+	
+rm -rf list
 
-awk '$4 >= 70 && $13 <= 0.00001 && $15 >= 95' AMPs.QAC.tsv | sort -k1,1 -k14,14gr -k13,13g -k4,4gr | sort -u -k1,1 --merge > AMPs.QAC.parsed.tsv
 
-##################################################################################################################################################################
-##################################################################################################################################################################
+
+rm -rf AMP.genes.fa*
