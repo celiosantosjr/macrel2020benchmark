@@ -25,12 +25,10 @@ wget 'https://s3-eu-west-1.amazonaws.com/pstorage-npg-968563215/15926906/DRAMP_c
 awk '{print ">"$1"\n"$2}' DRAMP.tsv > DRAMP.fa
 
 makeblastdb -in DRAMP.fa -dbtype prot -out DRAMP.db
-
 ##################################################################################################################################################################
 # Searching with DRAMP:
 
 blastp -db DRAMP.db -query AMPs.fasta -out AMPs.dramp.tsv -evalue 1e-5 -word_size 3 -qcov_hsp_perc 95.0 -outfmt "6 qseqid qlen sseqid slen pident length mismatch gapopen qstart qend sstart send evalue bitscore qcovs"
-
 ##################################################################################################################################################################
 ##################################################################################################################################################################
 # Parsing of Blast like results:
@@ -41,5 +39,11 @@ awk '$3 >= 70 && $4 <= 0.00001 && $6 >= 95' blastresults.tsv | sort -k1,1 -k5,5g
 ## 2. using local processing with DRAMP database
 awk '$4 >= 70 && $13 <= 0.00001 && $15 >= 95' AMPs.dramp.tsv | sort -k1,1 -k14,14gr -k13,13g -k4,4gr | sort -u -k1,1 --merge > AMPs.dramp.parsed.tsv
 awk '$4 >= 70 && $13 <= 0.00001 && $15 >= 95' AMPs.patented.tsv | sort -k1,1 -k14,14gr -k13,13g -k4,4gr | sort -u -k1,1 --merge > AMPs.patented.parsed.tsv
+##################################################################################################################################################################
+##################################################################################################################################################################
+## Results obtained with FACS to representative genomes,
+## metagenomes and real data were also transformed after elimination of
+## spurious ORFs into FACS files and were used to check overlapping in
+## those results -- Same parameters of blast searches were applied.
 ##################################################################################################################################################################
 ##################################################################################################################################################################
