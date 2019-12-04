@@ -35,7 +35,7 @@ if(!require(data.table)){
 set.seed(95014)
 
 # Taking argument
-model <- readRDS("FACS/orfsvm_19desc.rds")
+model <- readRDS("FACS/rf_dataset1.rds")
 
 # testing model
 testing <- fread(file = "HemoPI-1_Benchmark.tsv", sep="\t")
