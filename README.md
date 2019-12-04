@@ -44,3 +44,4 @@ In order to run all the codes, you will need besides FACS:
 - R v. 3.5+
 - [samtools](http://samtools.sourceforge.net/)
 - [bwa](https://github.com/lh3/bwa)
+- [eXpress](https://pachterlab.github.io/eXpress/)
